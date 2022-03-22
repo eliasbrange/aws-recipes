@@ -1,0 +1,5 @@
+-r src/requirements.txt
+
+flake8
+flake8-commas
+flake8-quotes
