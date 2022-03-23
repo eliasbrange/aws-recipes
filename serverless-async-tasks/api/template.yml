@@ -10,6 +10,7 @@ Resources:
   Table:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: eliasb-tasks
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
@@ -19,7 +20,8 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 1
         WriteCapacityUnits: 1
-      TableName: eliasb-tasks
+      StreamSpecification:
+        StreamViewType: NEW_IMAGE
 
 
   ApiFunction:
@@ -42,11 +44,32 @@ Resources:
           Properties:
             ApiId: !Ref Api
 
+  PublishFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "TaskPublisher"
+      MemorySize: 128
+      CodeUri: publish-function
+      Handler: app.handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Events:
+        Stream:
+          Type: DynamoDB
+          Properties:
+              Stream: !GetAtt Table.StreamArn
+              StartingPosition: TRIM_HORIZON
+              FilterCriteria:
+                Filters:
+                  - Pattern: '{"eventName": ["INSERT"]}'
+
   Api:
     Type: AWS::Serverless::HttpApi
 
 Outputs:
   ApiUrl:
-    Description: URL of your API
+    Description: URL of the Task API
     Value:
       Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
