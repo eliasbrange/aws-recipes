@@ -52,18 +52,25 @@ Resources:
       CodeUri: publish-function
       Handler: app.handler
       Runtime: python3.9
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt Topic.TopicName
       Environment:
         Variables:
-          TABLE_NAME: !Ref Table
+          TOPIC_ARN: !Ref Topic
       Events:
         Stream:
           Type: DynamoDB
           Properties:
               Stream: !GetAtt Table.StreamArn
               StartingPosition: TRIM_HORIZON
+              MaximumRetryAttempts: 5
               FilterCriteria:
                 Filters:
                   - Pattern: '{"eventName": ["INSERT"]}'
+
+  Topic:
+    Type: AWS::SNS::Topic
 
   Api:
     Type: AWS::Serverless::HttpApi
@@ -73,3 +80,7 @@ Outputs:
     Description: URL of the Task API
     Value:
       Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
+
+  TopicName:
+    Description: Name of the Task Topic
+    Value: !GetAtt Topic.TopicName

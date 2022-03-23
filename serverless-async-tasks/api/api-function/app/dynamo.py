@@ -21,10 +21,6 @@ class TaskNotFoundError(Error):
     pass
 
 
-def _get_timestamp():
-    return int(datetime.utcnow().timestamp())
-
-
 def create_task(task_type: str, payload: dict) -> str:
     task_id = str(uuid4())
     table.put_item(
@@ -32,7 +28,7 @@ def create_task(task_type: str, payload: dict) -> str:
             "id": task_id,
             "task_type": task_type,
             "status": "CREATED",
-            "payload": payload,
+            "payload": _encode_dict(payload),
             "created_time": _get_timestamp(),
         }
     )
@@ -87,22 +83,26 @@ def list_tasks(next_token: str = None) -> dict:
     }
 
     if next_token:
-        scan_args["ExclusiveStartKey"] = _decode_token(next_token)
+        scan_args["ExclusiveStartKey"] = _decode_dict(next_token)
 
     res = table.scan(**scan_args)
     response = {"tasks": res["Items"]}
 
     if "LastEvaluatedKey" in res:
-        response["next_token"] = _encode_token(res["LastEvaluatedKey"])
+        response["next_token"] = _encode_dict(res["LastEvaluatedKey"])
 
     return response
 
 
-def _encode_token(d: dict) -> str:
+def _encode_dict(d: dict) -> str:
     json_string = json.dumps(d)
     return base64.b64encode(json_string.encode("utf-8")).decode("utf-8")
 
 
-def _decode_token(token: str) -> dict:
+def _decode_dict(token: str) -> dict:
     json_string = base64.b64decode(token.encode("utf-8")).decode("utf-8")
     return json.loads(json_string)
+
+
+def _get_timestamp():
+    return int(datetime.utcnow().timestamp())
