@@ -4,7 +4,7 @@ import base64
 from uuid import uuid4
 from datetime import datetime
 import boto3
-from boto3.dynamodb.conditions import Attr, Key
+from boto3.dynamodb.conditions import Attr
 
 table = boto3.resource("dynamodb").Table(os.environ["TABLE_NAME"])
 
@@ -58,7 +58,7 @@ def update_task(task_id: str, status: str, status_msg: str):
     if status == "IN_PROGRESS":
         cond = Attr("status").eq("CREATED")
     else:
-        cond = Attr("id").exists() # Dummy condition
+        cond = Attr("id").exists()  # Dummy condition
 
     try:
         table.update_item(
@@ -90,9 +90,7 @@ def list_tasks(next_token: str = None) -> dict:
         scan_args["ExclusiveStartKey"] = _decode_token(next_token)
 
     res = table.scan(**scan_args)
-    response = {
-        "tasks": res["Items"]
-    }
+    response = {"tasks": res["Items"]}
 
     if "LastEvaluatedKey" in res:
         response["next_token"] = _encode_token(res["LastEvaluatedKey"])
@@ -102,9 +100,9 @@ def list_tasks(next_token: str = None) -> dict:
 
 def _encode_token(d: dict) -> str:
     json_string = json.dumps(d)
-    return base64.b64encode(json_string.encode('utf-8')).decode('utf-8')
+    return base64.b64encode(json_string.encode("utf-8")).decode("utf-8")
 
 
 def _decode_token(token: str) -> dict:
-    json_string = base64.b64decode(token.encode('utf-8')).decode('utf-8')
+    json_string = base64.b64decode(token.encode("utf-8")).decode("utf-8")
     return json.loads(json_string)

@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 from . import dynamo
@@ -38,7 +37,7 @@ def get_root():
 
 
 @app.get("/tasks", response_model=TaskListModel)
-def list_tasks(next_token: str=None):
+def list_tasks(next_token: str = None):
     return dynamo.list_tasks(next_token)
 
 
@@ -62,7 +61,7 @@ def update_task(task_id: str, payload: UpdatePayload):
     try:
         return dynamo.update_task(task_id, payload.status, payload.status_msg)
     except dynamo.TaskAlreadyInProgressError:
-        raise HTTPException(
-            status_code=400, detail="Task already in progress.")
+        raise HTTPException(status_code=400, detail="Task already in progerss.")
+
 
 handler = Mangum(app)
