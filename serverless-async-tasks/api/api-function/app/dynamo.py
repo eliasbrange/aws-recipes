@@ -4,7 +4,7 @@ import base64
 from uuid import uuid4
 from datetime import datetime
 import boto3
-from boto3.dynamodb.conditions import Attr
+from boto3.dynamodb.conditions import And, Attr
 
 table = boto3.resource("dynamodb").Table(os.environ["TABLE_NAME"])
 
@@ -13,11 +13,11 @@ class Error(Exception):
     pass
 
 
-class TaskAlreadyInProgressError(Error):
+class InvalidTaskStateError(Error):
     pass
 
 
-class ItemNotFoundError(Error):
+class TaskNotFoundError(Error):
     pass
 
 
@@ -49,16 +49,16 @@ def get_task(task_id: str) -> dict:
 
     item = res.get("Item")
     if not item:
-        raise ItemNotFoundError
+        raise TaskNotFoundError
 
     return item
 
 
 def update_task(task_id: str, status: str, status_msg: str):
+    cond = Attr("id").exists()
+
     if status == "IN_PROGRESS":
-        cond = Attr("status").eq("CREATED")
-    else:
-        cond = Attr("id").exists()  # Dummy condition
+        cond = And(cond, Attr("status").eq("CREATED"))
 
     try:
         table.update_item(
@@ -77,8 +77,8 @@ def update_task(task_id: str, status: str, status_msg: str):
             },
             ConditionExpression=cond,
         )
-    except table.meta.client.exceptions.ConditionalCheckFailedException:
-        raise TaskAlreadyInProgressError
+    except table.meta.client.exceptions.ConditionalCheckFailedException as e:
+        raise InvalidTaskStateError
 
 
 def list_tasks(next_token: str = None) -> dict:

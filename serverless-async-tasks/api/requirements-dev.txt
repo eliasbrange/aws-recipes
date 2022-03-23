@@ -1,4 +1,5 @@
--r src/requirements.txt
+-r api-function/requirements.txt
+-r publish-function/requirements.txt
 
 black
 flake8

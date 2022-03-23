@@ -45,7 +45,7 @@ def list_tasks(next_token: str = None):
 def get_task(task_id: str):
     try:
         return dynamo.get_task(task_id)
-    except dynamo.ItemNotFoundError:
+    except dynamo.TaskNotFoundError:
         raise HTTPException(status_code=404, detail="Task not found")
 
 
@@ -60,8 +60,10 @@ def post_task(payload: CreatePayload):
 def update_task(task_id: str, payload: UpdatePayload):
     try:
         return dynamo.update_task(task_id, payload.status, payload.status_msg)
-    except dynamo.TaskAlreadyInProgressError:
-        raise HTTPException(status_code=400, detail="Task already in progerss.")
+    except dynamo.InvalidTaskStateError:
+        raise HTTPException(
+            status_code=400, detail="Task does not exist or is already in progress."
+        )
 
 
 handler = Mangum(app)

@@ -21,12 +21,13 @@ Resources:
         WriteCapacityUnits: 1
       TableName: eliasb-tasks
 
-  APIFunction:
+
+  ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: "TaskAPI"
       MemorySize: 128
-      CodeUri: src
+      CodeUri: api-function
       Handler: app.handler
       Runtime: python3.9
       Policies:
