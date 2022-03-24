@@ -75,12 +75,22 @@ Resources:
   Api:
     Type: AWS::Serverless::HttpApi
 
+  ApiUrlParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/tasks/api_url"
+      Type: String
+      Value: !Sub "https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
+
+  TopicArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: "/tasks/topic_arn"
+      Type: String
+      Value: !Ref Topic
+
 Outputs:
   ApiUrl:
     Description: URL of the Task API
     Value:
-      Fn::Sub: 'https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}/'
-
-  TopicName:
-    Description: Name of the Task Topic
-    Value: !GetAtt Topic.TopicName
+      Fn::Sub: "https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
