@@ -32,7 +32,6 @@ class TaskListModel(BaseModel):
 
 @app.get("/")
 def get_root():
-    print("test")
     return {"message": "Hello World"}
 
 
@@ -51,7 +50,6 @@ def get_task(task_id: str):
 
 @app.post("/tasks", status_code=201)
 def post_task(payload: CreatePayload):
-    print(payload)
     task_id = dynamo.create_task(payload.task_type, payload.data)
     return task_id
 
