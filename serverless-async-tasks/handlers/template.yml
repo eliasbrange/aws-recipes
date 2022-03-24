@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Task Handlers
+
+Globals:
+  Function:
+    Timeout: 30
+
+Parameters:
+  TasksApiUrl:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Tasks
+    Default: /tasks/api_url
+  TasksTopic:
+    Type: AWS::SSM::Parameter::Value<String>
+    Description: Tasks Topic Arn
+    Default: /tasks/topic_arn
+
+Resources:
+  TaskHandler1Subscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      TopicArn: !Ref TasksTopic
+      Endpoint: !GetAtt TaskHandler1Queue.Arn
+      RawMessageDelivery: True
+
+  TaskHandler1Queue:
+    Type: AWS::SQS::Queue
+    Properties:
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt TaskHandler1DLQ.Arn
+        maxReceiveCount: 1
+
+  TaskHandler1QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref TaskHandler1Queue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: sqs:SendMessage
+            Resource: !GetAtt TaskHandler1Queue.Arn
+            Principal:
+              Service: "sns.amazonaws.com"
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref TasksTopic
+
+  TaskHandler1DLQ:
+    Type: AWS::SQS::Queue
+
+  TaskHandler1Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: "TaskHandler1"
+      MemorySize: 128
+      CodeUri: task-handler-function
+      Handler: app.handler
+      Runtime: python3.9
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt TaskHandler1Queue.QueueName
+      Environment:
+        Variables:
+          TASKS_API_URL: !Ref TasksApiUrl
+      Events:
+        Stream:
+          Type: SQS
+          Properties:
+              Queue: !GetAtt TaskHandler1Queue.Arn
+              BatchSize: 1
+              # FilterCriteria:
+              #   Filters:
+              #     - Pattern: '{"eventName": ["INSERT"]}'
