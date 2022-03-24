@@ -1,12 +1,11 @@
 version = 0.1
 
 [default.global.parameters]
-stack_name = "eliasb-task-api"
+stack_name = "TaskAPI"
 
 [default.deploy]
 [default.deploy.parameters]
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-s3_bucket = "elias-brange-ci-cd"
 s3_prefix = "task-api"
 region = "eu-west-1"

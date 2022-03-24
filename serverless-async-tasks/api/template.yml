@@ -10,7 +10,7 @@ Resources:
   Table:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: eliasb-tasks
+      TableName: tasks
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
