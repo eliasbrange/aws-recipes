@@ -33,7 +33,7 @@ def create_task(task_type: str, payload: dict) -> str:
         }
     )
 
-    return task_id
+    return {"id": task_id}
 
 
 def get_task(task_id: str) -> dict:
@@ -73,7 +73,7 @@ def update_task(task_id: str, status: str, status_msg: str):
             },
             ConditionExpression=cond,
         )
-    except table.meta.client.exceptions.ConditionalCheckFailedException as e:
+    except table.meta.client.exceptions.ConditionalCheckFailedException:
         raise InvalidTaskStateError
 
 
