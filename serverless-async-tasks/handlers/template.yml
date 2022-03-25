@@ -24,6 +24,9 @@ Resources:
       TopicArn: !Ref TasksTopic
       Endpoint: !GetAtt TaskHandler1Queue.Arn
       RawMessageDelivery: True
+      FilterPolicy:
+        TaskType:
+          - "TASK1"
 
   TaskHandler1Queue:
     Type: AWS::SQS::Queue
