@@ -60,7 +60,7 @@ Resources:
     Properties:
       FunctionName: "TaskHandler1"
       MemorySize: 128
-      CodeUri: task-handler-function
+      CodeUri: task1-function
       Handler: app.handler
       Runtime: python3.9
       Policies:
