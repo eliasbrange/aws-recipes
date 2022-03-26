@@ -75,6 +75,3 @@ Resources:
           Properties:
               Queue: !GetAtt TaskHandler1Queue.Arn
               BatchSize: 1
-              # FilterCriteria:
-              #   Filters:
-              #     - Pattern: '{"eventName": ["INSERT"]}'
