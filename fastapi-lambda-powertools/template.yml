@@ -28,15 +28,20 @@ Resources:
           TABLE_NAME: !Ref Table
       Events:
         DefaultEndpoint:
-          Type: HttpApi
+          Type: Api
           Properties:
-            ApiId: !Ref Api
+            RestApiId: !Ref RestApi
+            Path: /{proxy+}
+            Method: ANY
 
-  Api:
-    Type: AWS::Serverless::HttpApi
+  RestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+      TracingEnabled: true
 
 Outputs:
   ApiUrl:
     Description: URL of the API
     Value:
-      Fn::Sub: "https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
+      Fn::Sub: "https://${RestApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/Prod"
