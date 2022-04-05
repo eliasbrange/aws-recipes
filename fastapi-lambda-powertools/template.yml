@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: FastAPI Lambda PowerTools Example
+
+Resources:
+  Table:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey:
+        Name: "id"
+        Type: String
+
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      MemorySize: 128
+      CodeUri: src
+      Handler: app.handler
+      Runtime: python3.9
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref Table
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref Table
+      Events:
+        DefaultEndpoint:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref Api
+
+  Api:
+    Type: AWS::Serverless::HttpApi
+
+Outputs:
+  ApiUrl:
+    Description: URL of the API
+    Value:
+      Fn::Sub: "https://${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}"
