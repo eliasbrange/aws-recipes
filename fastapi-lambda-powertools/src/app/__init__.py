@@ -2,7 +2,7 @@ from uuid import uuid4
 from fastapi import FastAPI, Request, HTTPException
 from mangum import Mangum
 from . import dynamo, models
-from .utils import logger
+from .utils import logger, metrics, MetricUnit
 
 app = FastAPI()
 
@@ -42,6 +42,7 @@ def get_pet(pet_id: str):
 
 @app.post("/pets", status_code=201, response_model=models.PetResponse)
 def post_pet(payload: models.CreatePayload):
+    metrics.add_metric(name="CreatedPets", unit=MetricUnit.Count, value=1)
     return dynamo.create_pet(kind=payload.kind, name=payload.name)
 
 
@@ -66,3 +67,7 @@ handler = Mangum(app)
 
 # Add logging
 handler = logger.inject_lambda_context(handler, clear_state=True)
+
+# Add metrics
+# Put metrics decorator last to properly flush metrics.
+handler = metrics.log_metrics(handler, capture_cold_start_metric=True)
