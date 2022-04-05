@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class PetResponse(BaseModel):
@@ -13,8 +14,8 @@ class CreatePayload(BaseModel):
 
 
 class UpdatePayload(BaseModel):
-    name: str = None
-    kind: str = None
+    name: Optional[str]
+    kind: Optional[str]
 
 
 class PetListResponse(BaseModel):

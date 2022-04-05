@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from mangum import Mangum
 from . import dynamo, models
+from .utils import logger
 
 app = FastAPI()
 
@@ -12,11 +13,13 @@ def get_root():
 
 @app.get("/pets", response_model=models.PetListResponse)
 def list_pets(next_token: str = None):
+    logger.info("list_pets called")
     return dynamo.list_pets(next_token)
 
 
 @app.get("/pets/{pet_id}", response_model=models.PetResponse)
 def get_pet(pet_id: str):
+    logger.info("get_pet called")
     try:
         return dynamo.get_pet(pet_id)
     except dynamo.PetNotFoundError:
@@ -25,11 +28,13 @@ def get_pet(pet_id: str):
 
 @app.post("/pets", status_code=201, response_model=models.PetResponse)
 def post_pet(payload: models.CreatePayload):
+    logger.info("post_pet called")
     return dynamo.create_pet(kind=payload.kind, name=payload.name)
 
 
 @app.patch("/pets/{pet_id}", status_code=204)
 def update_pet(pet_id: str, payload: models.UpdatePayload):
+    logger.info("update_pet called")
     try:
         return dynamo.update_pet(
             pet_id=pet_id,

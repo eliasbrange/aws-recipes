@@ -22,6 +22,7 @@ Resources:
             TableName: !Ref Table
       Environment:
         Variables:
+          POWERTOOLS_SERVICE_NAME: FastAPIPowerToolsExample
           TABLE_NAME: !Ref Table
       Events:
         DefaultEndpoint:

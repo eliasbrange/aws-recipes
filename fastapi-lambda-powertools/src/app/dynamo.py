@@ -4,6 +4,7 @@ import base64
 from uuid import uuid4
 import boto3
 from boto3.dynamodb.conditions import Attr
+from .utils import logger
 
 table = boto3.resource("dynamodb").Table(os.environ["TABLE_NAME"])
 
@@ -17,6 +18,8 @@ class PetNotFoundError(Error):
 
 
 def create_pet(kind: str, name: str) -> dict:
+    logger.info("Creating pet", extra={"pet.kind": kind, "pet.name": name})
+
     pet_id = str(uuid4())
     item = {
         "id": pet_id,
@@ -28,6 +31,7 @@ def create_pet(kind: str, name: str) -> dict:
 
 
 def get_pet(pet_id: str) -> dict:
+    logger.info("Getting pet", extra={"pet.id": pet_id})
     res = table.get_item(
         Key={
             "id": pet_id,
@@ -43,18 +47,26 @@ def get_pet(pet_id: str) -> dict:
 
 def update_pet(pet_id: str, kind: str = None, name: str = None):
     expr = []
-    attrs = {}
+    attr_values = {}
+    attr_names = {}
 
     if kind is not None:
-        expr.append("kind=:k")
-        attrs[":k"] = kind
+        expr.append("#K=:k")
+        attr_values[":k"] = kind
+        attr_names["#K"] = "kind"
 
     if name is not None:
-        expr.append("name=:n")
-        attrs[":n"] = name
+        expr.append("#N=:n")
+        attr_values[":n"] = name
+        attr_names["#N"] = "name"
 
     if not expr:
+        logger.info("No fields to update")
         return
+
+    logger.info(
+        "Updating pet", extra={"pet.id": pet_id, "pet.kind": kind, "pet.name": name}
+    )
 
     try:
         table.update_item(
@@ -62,7 +74,8 @@ def update_pet(pet_id: str, kind: str = None, name: str = None):
                 "id": pet_id,
             },
             UpdateExpression=f"set {', '.join(expr)}",
-            ExpressionAttributeValues=attrs,
+            ExpressionAttributeValues=attr_values,
+            ExpressionAttributeNames=attr_names,
             ConditionExpression=Attr("id").exists(),
         )
     except table.meta.client.exceptions.ConditionalCheckFailedException:
@@ -70,6 +83,8 @@ def update_pet(pet_id: str, kind: str = None, name: str = None):
 
 
 def list_pets(next_token: str = None) -> dict:
+    logger.info("Listing pets", extra={"next_token": next_token})
+
     scan_args = {
         "Limit": 10,
     }
@@ -87,6 +102,8 @@ def list_pets(next_token: str = None) -> dict:
 
 
 def delete_pet(pet_id: str):
+    logger.info("Deleting pet", extra={"pet.id": pet_id})
+
     table.delete_item(
         Key={
             "id": pet_id,
