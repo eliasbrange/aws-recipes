@@ -23,6 +23,7 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: FastAPIPowerToolsExample
+          POWERTOOLS_METRICS_NAMESPACE: FastAPIPowerToolsExample
           TABLE_NAME: !Ref Table
       Events:
         DefaultEndpoint:

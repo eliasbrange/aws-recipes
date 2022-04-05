@@ -11,9 +11,13 @@ def _get_api_url():
 
 
 URL = _get_api_url()
+CORR_ID = str(uuid4())
+headers = {"X-Correlation-Id": CORR_ID}
 
+print(f"Correlation Id: {CORR_ID}")
+print("---")
 print("Listing pets")
-res = requests.get(f"{URL}/pets")
+res = requests.get(f"{URL}/pets", headers=headers)
 print(res.status_code, res.json())
 print("---")
 
@@ -22,37 +26,37 @@ data = {
     "name": "winston",
     "kind": "cat",
 }
-res = requests.post(f"{URL}/pets", json=data)
+res = requests.post(f"{URL}/pets", json=data, headers=headers)
 print(res.status_code, res.json())
 pet_id = res.json()["id"]
 print("---")
 
 print("Fetching pet")
-res = requests.get(f"{URL}/pets/{pet_id}")
+res = requests.get(f"{URL}/pets/{pet_id}", headers=headers)
 print(res.status_code, res.json())
 print("---")
 
 print("Updating pet")
 data = {"name": "donna"}
-res = requests.patch(f"{URL}/pets/{pet_id}", json=data)
+res = requests.patch(f"{URL}/pets/{pet_id}", json=data, headers=headers)
 print(res.status_code)
 print("---")
 
 print("Fetching pet")
-res = requests.get(f"{URL}/pets/{pet_id}")
+res = requests.get(f"{URL}/pets/{pet_id}", headers=headers)
 print(res.status_code, res.json())
 print("---")
 
 print("Listing pets")
-res = requests.get(f"{URL}/pets")
+res = requests.get(f"{URL}/pets", headers=headers)
 print(res.status_code, res.json())
 print("---")
 
 print("Deleting pet")
-res = requests.delete(f"{URL}/pets/{pet_id}")
+res = requests.delete(f"{URL}/pets/{pet_id}", headers=headers)
 print(res.status_code)
 print("---")
 
 print("Listing pets")
-res = requests.get(f"{URL}/pets")
+res = requests.get(f"{URL}/pets", headers=headers)
 print(res.status_code, res.json())
