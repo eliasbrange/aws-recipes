@@ -1,5 +1,6 @@
 import requests
 import boto3
+from uuid import uuid4
 
 
 def _get_api_url():

@@ -4,7 +4,7 @@ import base64
 from uuid import uuid4
 import boto3
 from boto3.dynamodb.conditions import Attr
-from .utils import logger
+from .utils import logger, tracer
 
 table = boto3.resource("dynamodb").Table(os.environ["TABLE_NAME"])
 
@@ -17,6 +17,7 @@ class PetNotFoundError(Error):
     pass
 
 
+@tracer.capture_method
 def create_pet(kind: str, name: str) -> dict:
     logger.info("Creating pet", extra={"pet.kind": kind, "pet.name": name})
 
@@ -30,6 +31,7 @@ def create_pet(kind: str, name: str) -> dict:
     return item
 
 
+@tracer.capture_method
 def get_pet(pet_id: str) -> dict:
     logger.info("Getting pet", extra={"pet.id": pet_id})
     res = table.get_item(
@@ -45,6 +47,7 @@ def get_pet(pet_id: str) -> dict:
     return item
 
 
+@tracer.capture_method
 def update_pet(pet_id: str, kind: str = None, name: str = None):
     expr = []
     attr_values = {}
@@ -82,6 +85,7 @@ def update_pet(pet_id: str, kind: str = None, name: str = None):
         raise PetNotFoundError
 
 
+@tracer.capture_method
 def list_pets(next_token: str = None) -> dict:
     logger.info("Listing pets", extra={"next_token": next_token})
 
@@ -101,6 +105,7 @@ def list_pets(next_token: str = None) -> dict:
     return response
 
 
+@tracer.capture_method
 def delete_pet(pet_id: str):
     logger.info("Deleting pet", extra={"pet.id": pet_id})
 

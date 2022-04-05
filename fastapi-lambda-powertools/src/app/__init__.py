@@ -2,7 +2,7 @@ from uuid import uuid4
 from fastapi import FastAPI, Request, HTTPException
 from mangum import Mangum
 from . import dynamo, models
-from .utils import logger, metrics, MetricUnit
+from .utils import tracer, logger, metrics, MetricUnit
 
 app = FastAPI()
 
@@ -65,9 +65,10 @@ def delete_pet(pet_id: str):
 
 handler = Mangum(app)
 
+# Add tracing
+handler.__name__ = "handler"  # tracer requires __name__ to be set
+handler = tracer.capture_lambda_handler(handler)
 # Add logging
 handler = logger.inject_lambda_context(handler, clear_state=True)
-
-# Add metrics
-# Put metrics decorator last to properly flush metrics.
+# Add metrics last to properly flush metrics.
 handler = metrics.log_metrics(handler, capture_cold_start_metric=True)
