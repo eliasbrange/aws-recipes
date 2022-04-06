@@ -1,33 +1,20 @@
-from uuid import uuid4
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 from mangum import Mangum
 from . import dynamo, models
+from .router import LoggerRouteHandler
 from .utils import tracer, logger, metrics, MetricUnit
 
+
 app = FastAPI()
+app.router.route_class = LoggerRouteHandler
 
 
 @app.exception_handler(Exception)
 async def validation_exception_handler(request, err):
     logger.exception("Unhandled exception")
     return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
-
-
-@app.middleware("http")
-async def logger_middleware(request: Request, call_next):
-    # Get correlation id from X-Correlation-Id header, or generate one.
-    corr_id = request.headers.get("x-correlation-id", str(uuid4()))
-    logger.set_correlation_id(corr_id)
-
-    # Add some request context to logs
-    ctx = {"path": request.url.path, "method": request.method}
-    logger.append_keys(req=ctx)
-
-    logger.info("Received request")
-    response = await call_next(request)
-    return response
 
 
 @app.get("/")
