@@ -28,8 +28,10 @@ class LoggerRouteHandler(APIRoute):
                 "method": request.method,
             }
             logger.append_keys(fastapi=ctx)
-
             logger.info("Received request")
-            return await original_route_handler(request)
+
+            response = await original_route_handler(request)
+            response.headers["X-Correlation-Id"] = corr_id
+            return response
 
         return route_handler

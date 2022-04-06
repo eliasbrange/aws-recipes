@@ -20,6 +20,7 @@ print("---")
 print("Listing pets")
 res = requests.get(f"{URL}/pets", headers=headers)
 print(res.status_code, res.json())
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 print("---")
 
 print("Creating pet")
@@ -29,35 +30,42 @@ data = {
 }
 res = requests.post(f"{URL}/pets", json=data, headers=headers)
 print(res.status_code, res.json())
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 pet_id = res.json()["id"]
 print("---")
 
 print("Fetching pet")
 res = requests.get(f"{URL}/pets/{pet_id}", headers=headers)
 print(res.status_code, res.json())
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 print("---")
 
 print("Updating pet")
 data = {"name": "donna"}
 res = requests.patch(f"{URL}/pets/{pet_id}", json=data, headers=headers)
 print(res.status_code)
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 print("---")
 
 print("Fetching pet")
 res = requests.get(f"{URL}/pets/{pet_id}", headers=headers)
 print(res.status_code, res.json())
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 print("---")
 
 print("Listing pets")
 res = requests.get(f"{URL}/pets", headers=headers)
 print(res.status_code, res.json())
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 print("---")
 
 print("Deleting pet")
 res = requests.delete(f"{URL}/pets/{pet_id}", headers=headers)
 print(res.status_code)
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
 print("---")
 
 print("Listing pets")
 res = requests.get(f"{URL}/pets", headers=headers)
 print(res.status_code, res.json())
+print(f"Response CorrId: {res.headers.get('X-Correlation-Id')}")
