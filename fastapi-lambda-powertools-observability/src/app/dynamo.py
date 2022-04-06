@@ -109,11 +109,15 @@ def list_pets(next_token: str = None) -> dict:
 def delete_pet(pet_id: str):
     logger.info("Deleting pet", extra={"pet.id": pet_id})
 
-    table.delete_item(
-        Key={
-            "id": pet_id,
-        }
-    )
+    try:
+        table.delete_item(
+            Key={
+                "id": pet_id,
+            },
+            ConditionExpression=Attr("id").exists(),
+        )
+    except table.meta.client.exceptions.ConditionalCheckFailedException:
+        raise PetNotFoundError
 
 
 def _encode(data: dict) -> str:

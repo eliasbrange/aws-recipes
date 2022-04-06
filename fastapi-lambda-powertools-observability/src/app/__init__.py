@@ -1,10 +1,18 @@
 from uuid import uuid4
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import JSONResponse
+
 from mangum import Mangum
 from . import dynamo, models
 from .utils import tracer, logger, metrics, MetricUnit
 
 app = FastAPI()
+
+
+@app.exception_handler(Exception)
+async def validation_exception_handler(request, err):
+    logger.exception("Unhandled exception")
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 @app.middleware("http")
@@ -61,7 +69,15 @@ def update_pet(pet_id: str, payload: models.UpdatePayload):
 
 @app.delete("/pets/{pet_id}", status_code=204)
 def delete_pet(pet_id: str):
-    dynamo.delete_pet(pet_id)
+    try:
+        dynamo.delete_pet(pet_id)
+    except dynamo.PetNotFoundError:
+        raise HTTPException(status_code=404, detail="Pet not found")
+
+
+@app.get("/fail")
+def fail():
+    raise Exception
 
 
 handler = Mangum(app)
