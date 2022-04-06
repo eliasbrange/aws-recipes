@@ -42,8 +42,9 @@ def get_pet(pet_id: str):
 
 @app.post("/pets", status_code=201, response_model=models.PetResponse)
 def post_pet(payload: models.CreatePayload):
+    res = dynamo.create_pet(kind=payload.kind, name=payload.name)
     metrics.add_metric(name="CreatedPets", unit=MetricUnit.Count, value=1)
-    return dynamo.create_pet(kind=payload.kind, name=payload.name)
+    return res
 
 
 @app.patch("/pets/{pet_id}", status_code=204)
