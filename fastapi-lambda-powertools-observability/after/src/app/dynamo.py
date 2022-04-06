@@ -19,7 +19,7 @@ class PetNotFoundError(Error):
 
 @tracer.capture_method
 def create_pet(kind: str, name: str) -> dict:
-    logger.info("Creating pet", extra={"pet.kind": kind, "pet.name": name})
+    logger.info("Creating pet")
 
     pet_id = str(uuid4())
     item = {
@@ -33,7 +33,7 @@ def create_pet(kind: str, name: str) -> dict:
 
 @tracer.capture_method
 def get_pet(pet_id: str) -> dict:
-    logger.info("Getting pet", extra={"pet.id": pet_id})
+    logger.info("Getting pet")
     res = table.get_item(
         Key={
             "id": pet_id,
@@ -67,10 +67,7 @@ def update_pet(pet_id: str, kind: str = None, name: str = None):
         logger.info("No fields to update")
         return
 
-    logger.info(
-        "Updating pet", extra={"pet.id": pet_id, "pet.kind": kind, "pet.name": name}
-    )
-
+    logger.info("Updating pet")
     try:
         table.update_item(
             Key={
@@ -87,7 +84,7 @@ def update_pet(pet_id: str, kind: str = None, name: str = None):
 
 @tracer.capture_method
 def list_pets(next_token: str = None) -> dict:
-    logger.info("Listing pets", extra={"next_token": next_token})
+    logger.info("Listing pets")
 
     scan_args = {
         "Limit": 10,
@@ -107,7 +104,7 @@ def list_pets(next_token: str = None) -> dict:
 
 @tracer.capture_method
 def delete_pet(pet_id: str):
-    logger.info("Deleting pet", extra={"pet.id": pet_id})
+    logger.info("Deleting pet")
 
     try:
         table.delete_item(
