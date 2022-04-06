@@ -1,6 +1,6 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-
+from starlette.exceptions import ExceptionMiddleware
 from mangum import Mangum
 from . import dynamo, models
 from .router import LoggerRouteHandler
@@ -9,10 +9,29 @@ from .utils import tracer, logger, metrics, MetricUnit
 
 app = FastAPI()
 app.router.route_class = LoggerRouteHandler
+app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
+
+
+@app.middleware("http")
+async def add_process_time_header(request: Request, call_next):
+    # Get correlation id from X-Correlation-Id header
+    corr_id = request.headers.get("x-correlation-id")
+    if not corr_id:
+        # If empty, use request id from aws context
+        corr_id = request.scope["aws.context"].aws_request_id
+
+    # Add correlation id to logs
+    logger.set_correlation_id(corr_id)
+
+    response = await call_next(request)
+
+    # Return correlation header in response
+    response.headers["X-Correlation-Id"] = corr_id
+    return response
 
 
 @app.exception_handler(Exception)
-async def validation_exception_handler(request, err):
+async def unhandled_exception_handler(request, err):
     logger.exception("Unhandled exception")
     return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
@@ -64,7 +83,8 @@ def delete_pet(pet_id: str):
 
 @app.get("/fail")
 def fail():
-    raise Exception
+    some_dict = {}
+    return some_dict["missing_key"]
 
 
 handler = Mangum(app)
