@@ -1,0 +1,5 @@
+-r src/requirements.txt
+
+black
+flake8
+requests

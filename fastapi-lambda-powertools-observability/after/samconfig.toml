@@ -1,0 +1,11 @@
+version = 0.1
+
+[default.global.parameters]
+stack_name = "FastAPIPowerToolsExample"
+
+[default.deploy]
+[default.deploy.parameters]
+confirm_changeset = false
+capabilities = "CAPABILITY_IAM"
+s3_prefix = "fastapi-powertools"
+region = "eu-west-1"
