@@ -1,4 +1,3 @@
-from uuid import uuid4
 from fastapi import Request, Response
 from fastapi.routing import APIRoute
 from typing import Callable
