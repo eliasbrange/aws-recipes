@@ -33,6 +33,7 @@ async def add_correlation_id(request: Request, call_next):
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request, err):
     logger.exception("Unhandled exception")
+    metrics.add_metric(name="UnhandledExceptions", unit=MetricUnit.Count, value=1)
     return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
