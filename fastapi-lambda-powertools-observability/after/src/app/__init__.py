@@ -23,6 +23,9 @@ async def add_correlation_id(request: Request, call_next):
     # Add correlation id to logs
     logger.set_correlation_id(corr_id)
 
+    # Add correlation id to traces
+    tracer.put_annotation(key="correlation_id", value=corr_id)
+
     response = await call_next(request)
 
     # Return correlation header in response
