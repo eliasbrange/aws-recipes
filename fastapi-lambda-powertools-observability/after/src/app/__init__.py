@@ -13,7 +13,7 @@ app.add_middleware(ExceptionMiddleware, handlers=app.exception_handlers)
 
 
 @app.middleware("http")
-async def add_process_time_header(request: Request, call_next):
+async def add_correlation_id(request: Request, call_next):
     # Get correlation id from X-Correlation-Id header
     corr_id = request.headers.get("x-correlation-id")
     if not corr_id:
