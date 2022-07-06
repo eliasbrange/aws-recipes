@@ -1,22 +1,23 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { SSMClient, GetParameterCommand } from '@aws-sdk/client-ssm';
 
-/**
- *
- * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
- * @param {Object} event - API Gateway Lambda Proxy Input Format
- *
- * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
- * @returns {Object} object - API Gateway Lambda Proxy Output Format
- *
- */
+const ssmClient = new SSMClient({});
+const input = { Name: '/sam/tableName' };
+const command = new GetParameterCommand(input);
+const parameterPromise = ssmClient.send(command);
 
 export const lambdaHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     let response: APIGatewayProxyResult;
+
+    const parameter = await parameterPromise;
     try {
         response = {
             statusCode: 200,
             body: JSON.stringify({
                 message: 'hello world',
+                paramFromOutput: process.env.TABLE_NAME_FROM_OUTPUT,
+                paramFromSSMDeployTime: process.env.TABLE_NAME_FROM_SSM,
+                paramFromSSMRunTime: parameter.Parameter?.Value,
             }),
         };
     } catch (err) {

@@ -22,6 +22,8 @@ Resources:
       Value: !Ref Table
 
 Outputs:
-  SAMExportedTable:
+  TableName:
     Description: "DynamoDB Table name"
     Value: !Ref Table
+    Export:
+      Name: SAMExportedTable
