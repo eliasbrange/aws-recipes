@@ -12,7 +12,11 @@ export class ExportStack extends Stack {
             billingMode: dynamodb.BillingMode.PROVISIONED,
         });
 
-        new ssm.StringParameter(this, 'SSMParam', { type: ssm.ParameterType.STRING, stringValue: table.tableName });
+        new ssm.StringParameter(this, 'SSMParam', {
+            parameterName: '/cdk/tableName',
+            type: ssm.ParameterType.STRING,
+            stringValue: table.tableName,
+        });
 
         new CfnOutput(this, 'TableNameOutput', { value: table.tableName, exportName: 'CDKExportedTableName' });
     }
