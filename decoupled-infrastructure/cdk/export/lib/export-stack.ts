@@ -1,16 +1,19 @@
-import { Stack, StackProps } from 'aws-cdk-lib';
+import { Stack, StackProps, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 
 export class ExportStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
-    super(scope, id, props);
+    constructor(scope: Construct, id: string, props?: StackProps) {
+        super(scope, id, props);
 
-    // The code that defines your stack goes here
+        const table = new dynamodb.Table(this, 'Table', {
+            partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING },
+            billingMode: dynamodb.BillingMode.PROVISIONED,
+        });
 
-    // example resource
-    // const queue = new sqs.Queue(this, 'ExportQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
-  }
+        new ssm.StringParameter(this, 'SSMParam', { type: ssm.ParameterType.STRING, stringValue: table.tableName });
+
+        new CfnOutput(this, 'TableNameOutput', { value: table.tableName, exportName: 'CDKExportedTableName' });
+    }
 }

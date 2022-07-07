@@ -17,7 +17,7 @@ Resources:
         - x86_64
       Environment:
         Variables:
-          TABLE_NAME_FROM_OUTPUT: !ImportValue "SAMExportedTable"
+          TABLE_NAME_FROM_OUTPUT: !ImportValue "SAMExportedTableName"
           TABLE_NAME_FROM_SSM: "{{resolve:ssm:/sam/tableName}}"
       Policies:
         - SSMParameterReadPolicy:

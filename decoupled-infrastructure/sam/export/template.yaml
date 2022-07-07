@@ -26,4 +26,4 @@ Outputs:
     Description: "DynamoDB Table name"
     Value: !Ref Table
     Export:
-      Name: SAMExportedTable
+      Name: SAMExportedTableName
