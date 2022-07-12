@@ -1,0 +1,35 @@
+service: sls-import
+frameworkVersion: "3"
+plugins:
+  - serverless-esbuild
+
+package:
+  individually: true
+
+provider:
+  name: aws
+  region: eu-west-1
+  runtime: nodejs16.x
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+    NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000"
+
+custom:
+  esbuild:
+    bundle: true
+    minify: true
+    sourcemap: true
+    target: node16
+    exclude:
+      - aws-sdk
+
+functions:
+  hello:
+    handler: src/functions/app.lambdaHandler
+    environment:
+      TABLE_NAME_FROM_OUTPUT: !ImportValue SLSExportedTableName
+      TABLE_NAME_FROM_SSM: ${ssm:/sls/tableName}
+    events:
+      - httpApi:
+          path: /hello
+          method: get

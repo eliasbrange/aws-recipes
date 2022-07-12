@@ -1,0 +1,29 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Export
+
+Resources:
+  Table:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+
+  SSMParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Type: String
+      Name: "/sam/tableName"
+      Value: !Ref Table
+
+Outputs:
+  TableName:
+    Description: "DynamoDB Table name"
+    Value: !Ref Table
+    Export:
+      Name: SAMExportedTableName

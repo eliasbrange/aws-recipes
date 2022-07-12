@@ -1,0 +1,33 @@
+service: sls-export
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  region: eu-west-1
+
+resources:
+  Resources:
+    Table:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+
+    SSMParam:
+      Type: AWS::SSM::Parameter
+      Properties:
+        Type: String
+        Name: "/sls/tableName"
+        Value: !Ref Table
+
+  Outputs:
+    TableName:
+      Description: "DynamoDB Table name"
+      Value: !Ref Table
+      Export:
+        Name: SLSExportedTableName
