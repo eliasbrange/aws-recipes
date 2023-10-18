@@ -15,6 +15,9 @@ Resources:
       Runtime: nodejs18.x
       Architectures:
         - x86_64
+      Environment:
+        Variables:
+          EVENT_BUS: !Ref EventBus
       Policies:
         - EventBridgePutEventsPolicy:
             EventBusName: !Ref EventBus
@@ -36,6 +39,23 @@ Resources:
     Type: AWS::Events::EventBus
     Properties:
       Name: !Sub ${AWS::StackName}-event-bus
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/events/${AWS::StackName}-event-bus-debug
+      RetentionInDays: 1
+  DebugRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${AWS::StackName}-debug-rule
+      Description: Rule to debug events
+      EventBusName: !Ref EventBus
+      EventPattern:
+        source:
+          - prefix: ''
+      Targets:
+        - Arn: !GetAtt LogGroup.Arn
+          Id: !Sub ${AWS::StackName}-debug-target
 
 Outputs:
   ApiUrl:

@@ -11,7 +11,8 @@
     "lint": "eslint '*.ts' --quiet --fix",
     "prettier": "prettier --write .",
     "compile": "tsc",
-    "test": "npm run compile && npm run unit"
+    "test": "npm run compile && npm run unit",
+    "deploy": "sam build && sam deploy"
   },
   "dependencies": {
     "esbuild": "^0.14.14"
