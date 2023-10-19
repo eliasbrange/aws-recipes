@@ -1,17 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: Sample application to test EventBridge with Momento Topics
+Description: Sample application
 
 Globals:
   Function:
     Timeout: 30
 
 Resources:
-  MyFunction:
+  CreateOrder:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/handlers/
-      Handler: my-function.handler
+      Handler: create-order.handler
       Runtime: nodejs18.x
       Architectures:
         - x86_64
@@ -26,7 +26,7 @@ Resources:
           Type: Api
           Properties:
             Path: /
-            Method: get
+            Method: post
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -34,30 +34,19 @@ Resources:
         Target: 'es2020'
         Sourcemap: true
         EntryPoints:
-          - my-function.ts
+          - create-order.ts
+
   EventBus:
     Type: AWS::Events::EventBus
     Properties:
       Name: !Sub ${AWS::StackName}-event-bus
-  DebugLogGroup:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      LogGroupName: !Sub /aws/events/${AWS::StackName}-event-bus-debug
-      RetentionInDays: 1
-  DebugRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Name: !Sub ${AWS::StackName}-debug-rule
-      Description: Rule to debug events
-      EventBusName: !Ref EventBus
-      EventPattern:
-        source:
-          - prefix: ''
-      Targets:
-        - Arn: !GetAtt DebugLogGroup.Arn
-          Id: !Sub ${AWS::StackName}-debug-target
 
 Outputs:
   ApiUrl:
-    Description: 'API Gateway endpoint URL'
+    Description: 'API Gateway Endpoint URL'
     Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/'
+  EventBusName:
+    Description: 'Event Bus Name'
+    Value: !Ref EventBus
+    Export:
+      Name: !Sub MyEventBusName

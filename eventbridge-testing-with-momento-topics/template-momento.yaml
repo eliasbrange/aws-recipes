@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Momento destination for EventBridge
+
+Parameters:
+  MomentoAuthToken:
+    Type: String
+    NoEcho: true
+  TopicName:
+    Type: String
+  CacheName:
+    Type: String
+
+Resources:
+  DLQ:
+    Type: AWS::SQS::Queue
+
+  Connection:
+    Type: AWS::Events::Connection
+    Properties:
+      AuthorizationType: API_KEY
+      AuthParameters:
+        ApiKeyAuthParameters:
+          ApiKeyName: Authorization
+          ApiKeyValue: !Sub ${MomentoAuthToken}
+
+  Destination:
+    Type: AWS::Events::ApiDestination
+    Properties:
+      ConnectionArn: !GetAtt Connection.Arn
+      HttpMethod: POST
+      InvocationEndpoint: !Sub https://api.cache.cell-1-eu-west-1-1.prod.a.momentohq.com/topics/${CacheName}/${TopicName}
+      InvocationRateLimitPerSecond: 300
+
+  TargetRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action: sts:AssumeRole
+      Path: /service-role/
+      Policies:
+        - PolicyName: destinationinvoke
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - events:InvokeApiDestination
+                Resource: !GetAtt Destination.Arn
+
+  Rule:
+    Type: AWS::Events::Rule
+    Properties:
+      EventBusName: !ImportValue 'MyEventBusName'
+      EventPattern:
+        source:
+          - prefix: ''
+      State: ENABLED
+      Targets:
+        - Id: topicPublish-rule
+          Arn: !GetAtt Destination.Arn
+          RoleArn: !GetAtt TargetRole.Arn
+          DeadLetterConfig:
+            Arn: !GetAtt DLQ.Arn
