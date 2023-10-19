@@ -29,3 +29,21 @@ warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
+
+[momento]
+[momento.global.parameters]
+stack_name = "eventbridge-momento-testing-momento"
+
+[momento.build.parameters]
+cached = true
+parallel = true
+template_file = "template-momento.yaml"
+
+[momento.validate.parameters]
+lint = true
+
+[momento.deploy.parameters]
+capabilities = "CAPABILITY_IAM"
+confirm_changeset = false
+resolve_s3 = true
+
