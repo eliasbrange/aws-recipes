@@ -39,7 +39,7 @@ Resources:
     Type: AWS::Events::EventBus
     Properties:
       Name: !Sub ${AWS::StackName}-event-bus
-  LogGroup:
+  DebugLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/events/${AWS::StackName}-event-bus-debug
@@ -54,7 +54,7 @@ Resources:
         source:
           - prefix: ''
       Targets:
-        - Arn: !GetAtt LogGroup.Arn
+        - Arn: !GetAtt DebugLogGroup.Arn
           Id: !Sub ${AWS::StackName}-debug-target
 
 Outputs:
