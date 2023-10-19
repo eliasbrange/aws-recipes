@@ -2,6 +2,8 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: Momento destination for EventBridge
 
 Parameters:
+  MomentoEndpoint:
+    Type: String
   MomentoAuthToken:
     Type: String
     NoEcho: true
@@ -28,7 +30,7 @@ Resources:
     Properties:
       ConnectionArn: !GetAtt Connection.Arn
       HttpMethod: POST
-      InvocationEndpoint: !Sub https://api.cache.cell-1-eu-west-1-1.prod.a.momentohq.com/topics/${CacheName}/${TopicName}
+      InvocationEndpoint: !Sub ${MomentoEndpoint}/topics/${CacheName}/${TopicName}
       InvocationRateLimitPerSecond: 300
 
   TargetRole:
