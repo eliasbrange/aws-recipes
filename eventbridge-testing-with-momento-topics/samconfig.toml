@@ -6,10 +6,6 @@ version = 0.1
 [default.global.parameters]
 stack_name = "eventbridge-momento-testing"
 
-[default.build.parameters]
-cached = true
-parallel = true
-
 [default.validate.parameters]
 lint = true
 
@@ -18,25 +14,11 @@ capabilities = "CAPABILITY_IAM"
 confirm_changeset = false
 resolve_s3 = true
 
-[default.package.parameters]
-resolve_s3 = true
-
-[default.sync.parameters]
-watch = true
-
-[default.local_start_api.parameters]
-warm_containers = "EAGER"
-
-[default.local_start_lambda.parameters]
-warm_containers = "EAGER"
-
 [momento]
 [momento.global.parameters]
 stack_name = "eventbridge-momento-testing-momento"
 
 [momento.build.parameters]
-cached = true
-parallel = true
 template_file = "template-momento.yaml"
 
 [momento.validate.parameters]
