@@ -5,6 +5,7 @@ version = 0.1
 [default]
 [default.global.parameters]
 stack_name = "eventbridge-momento-testing"
+region = "eu-west-1"
 
 [default.validate.parameters]
 lint = true
@@ -16,6 +17,7 @@ resolve_s3 = true
 
 [momento]
 [momento.global.parameters]
+region = "eu-west-1"
 stack_name = "eventbridge-momento-testing-momento"
 
 [momento.build.parameters]

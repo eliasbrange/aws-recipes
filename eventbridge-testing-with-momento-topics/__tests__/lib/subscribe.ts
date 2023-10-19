@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 const topicClient = new TopicClient({
   configuration: TopicConfigurations.Default.latest(),
   credentialProvider: CredentialProvider.fromEnvironmentVariable({
-    environmentVariableName: 'MOMENTO_TOKEN',
+    environmentVariableName: 'MOMENTO_API_KEY',
   }),
 });
 const CACHE_NAME = process.env.CACHE_NAME || '';
