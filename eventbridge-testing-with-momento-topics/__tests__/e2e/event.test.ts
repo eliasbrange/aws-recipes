@@ -31,5 +31,5 @@ describe('When an order is created', async () => {
     });
 
     expect(message).not.toBeNull();
-  });
+  }, 5000);
 });
