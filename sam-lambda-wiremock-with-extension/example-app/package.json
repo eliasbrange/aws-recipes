@@ -1,0 +1,20 @@
+{
+  "name": "example-app",
+  "version": "1.0.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/aws-lambda": "8.10.145",
+    "@types/node": "22.7.9",
+    "esbuild": "0.24.0",
+    "ts-node": "10.9.2",
+    "typescript": "5.6.3"
+  },
+  "dependencies": {}
+}

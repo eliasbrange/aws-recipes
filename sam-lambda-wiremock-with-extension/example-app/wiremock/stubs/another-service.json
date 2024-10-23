@@ -1,0 +1,11 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/another-service/some-path"
+  },
+  "response": {
+    "jsonBody": {
+      "message": "Hello from Stubr/Wiremock!"
+    }
+  }
+}

@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Example app showcasing how to mock HTTP APIs with WireMock
+
+Resources:
+  StubsLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: wiremock
+      CompatibleRuntimes:
+        - nodejs20.x
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/functions/api.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - arm64
+      Timeout: 30
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:lambda-wiremock:1
+        - !Ref StubsLayer
+      Environment:
+        Variables:
+          ANOTHER_SERVICE_URL: http://127.0.0.1:1234/another-service
+      Events:
+        HelloApi:
+          Type: HttpApi
+          Properties:
+            Path: /hello
+            Method: get
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2020"
+        Sourcemap: true
+
+Outputs:
+  ApiURL:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
