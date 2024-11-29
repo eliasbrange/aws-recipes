@@ -58,6 +58,7 @@ export class TestResources extends Construct {
         entry: "src/publishToAppSync.ts",
         handler: "handler",
         runtime: lambda.Runtime.NODEJS_20_X,
+        memorySize: 1769,
         environment: {
           EVENTS_API_URL: `https://${this.eventsApi.attrDnsHttp}`,
           EVENTS_API_KEY: eventsApiKey.attrApiKey,

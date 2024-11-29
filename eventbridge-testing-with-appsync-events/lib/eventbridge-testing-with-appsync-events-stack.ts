@@ -21,6 +21,7 @@ export class EventbridgeTestingWithAppsyncEventsStack extends cdk.Stack {
       entry: "src/api.ts",
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_20_X,
+      memorySize: 1769,
       environment: {
         EVENT_BUS_NAME: eventBus.eventBusName,
       },
