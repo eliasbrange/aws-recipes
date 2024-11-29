@@ -1,6 +1,7 @@
 .aws-sam
 .venv
-.vscode
 
 .env.json
 .event.json
+
+node_modules
