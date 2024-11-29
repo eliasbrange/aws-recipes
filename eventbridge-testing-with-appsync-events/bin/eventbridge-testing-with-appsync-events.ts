@@ -6,5 +6,7 @@ const app = new cdk.App();
 new EventbridgeTestingWithAppsyncEventsStack(
   app,
   "EventbridgeTestingWithAppsyncEventsStack",
-  {},
+  {
+    includeTestStack: true,
+  },
 );
