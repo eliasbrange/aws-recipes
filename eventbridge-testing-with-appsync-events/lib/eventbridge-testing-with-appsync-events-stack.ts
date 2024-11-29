@@ -1,7 +1,8 @@
 import * as cdk from "aws-cdk-lib";
+import * as apigwv2 from "aws-cdk-lib/aws-apigatewayv2";
+import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as eventbridge from "aws-cdk-lib/aws-events";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import type { Construct } from "constructs";
 import { TestResources } from "./test-resources";
@@ -27,13 +28,25 @@ export class EventbridgeTestingWithAppsyncEventsStack extends cdk.Stack {
 
     eventBus.grantPutEventsTo(apiFn);
 
-    const api = new apigateway.RestApi(this, "Api");
-    api.root
-      .addResource("event")
-      .addMethod("POST", new apigateway.LambdaIntegration(apiFn));
+    const api = new apigwv2.HttpApi(this, "Api");
+    api.addRoutes({
+      path: "/event",
+      methods: [apigwv2.HttpMethod.POST],
+      integration: new HttpLambdaIntegration("LambdaIntegration", apiFn),
+    });
+
+    new cdk.CfnOutput(this, "ApiUrl", {
+      value: api.url ?? "no-url",
+    });
 
     if (props?.includeTestStack) {
-      new TestResources(this, "TestResources", { eventBus });
+      const testResources = new TestResources(this, "TestResources", {
+        eventBus,
+      });
+
+      new cdk.CfnOutput(this, "EventsApiUrl", {
+        value: `https://${testResources.eventsApi.attrDnsHttp}/event`,
+      });
     }
   }
 }

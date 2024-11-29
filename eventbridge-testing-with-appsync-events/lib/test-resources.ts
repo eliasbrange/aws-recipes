@@ -1,8 +1,9 @@
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
-import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as cdk from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as eventbridge from "aws-cdk-lib/aws-events";
 import * as eventbridgeTargets from "aws-cdk-lib/aws-events-targets";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 
 interface ConstructProps {
@@ -10,10 +11,12 @@ interface ConstructProps {
 }
 
 export class TestResources extends Construct {
+  public eventsApi: appsync.CfnApi;
+
   constructor(scope: Construct, id: string, props: ConstructProps) {
     super(scope, id);
 
-    const eventsApi = new appsync.CfnApi(this, "TestEventsApi", {
+    this.eventsApi = new appsync.CfnApi(this, "TestEventsApi", {
       name: "TestEventsApi",
       eventConfig: {
         authProviders: [
@@ -40,11 +43,11 @@ export class TestResources extends Construct {
     });
 
     const eventsApiKey = new appsync.CfnApiKey(this, "TestEventsApiKey", {
-      apiId: eventsApi.attrApiId,
+      apiId: this.eventsApi.attrApiId,
     });
 
     new appsync.CfnChannelNamespace(this, "TestEventsNamespace", {
-      apiId: eventsApi.attrApiId,
+      apiId: this.eventsApi.attrApiId,
       name: "default",
     });
 
@@ -56,7 +59,7 @@ export class TestResources extends Construct {
         handler: "handler",
         runtime: lambda.Runtime.NODEJS_20_X,
         environment: {
-          EVENTS_API_URL: `https://${eventsApi.attrDnsHttp}`,
+          EVENTS_API_URL: `https://${this.eventsApi.attrDnsHttp}`,
           EVENTS_API_KEY: eventsApiKey.attrApiKey,
         },
       },

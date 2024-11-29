@@ -1,9 +1,9 @@
 import "dotenv/config";
-import { ReplaySubject, firstValueFrom } from "rxjs";
-import { filter } from "rxjs/operators";
-import * as _ from "lodash";
 import { Amplify } from "aws-amplify";
 import { events } from "aws-amplify/data";
+import * as _ from "lodash";
+import { ReplaySubject, firstValueFrom } from "rxjs";
+import { filter } from "rxjs/operators";
 import { WebSocket } from "ws";
 
 // @ts-expect-error type
