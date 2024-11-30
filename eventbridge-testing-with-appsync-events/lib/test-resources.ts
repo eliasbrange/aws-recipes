@@ -5,6 +5,7 @@ import * as eventbridgeTargets from "aws-cdk-lib/aws-events-targets";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { Construct } from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as logs from "aws-cdk-lib/aws-logs";
 
 interface ConstructProps {
   eventBus: eventbridge.IEventBus;
@@ -64,6 +65,13 @@ export class TestResources extends Construct {
 
     const stateMachine = new sfn.StateMachine(this, "TestEventsStateMachine", {
       stateMachineType: sfn.StateMachineType.EXPRESS,
+      logs: {
+        destination: new logs.LogGroup(this, "TestEventsStateMachineLogGroup", {
+          logGroupName: "/aws/vendedlogs/states/TestEventsStateMachine",
+        }),
+        includeExecutionData: true,
+        level: sfn.LogLevel.ALL,
+      },
       definitionBody: sfn.DefinitionBody.fromString(
         JSON.stringify({
           QueryLanguage: "JSONata",
