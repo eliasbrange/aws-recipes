@@ -68,6 +68,7 @@ export class TestResources extends Construct {
       logs: {
         destination: new logs.LogGroup(this, "TestEventsStateMachineLogGroup", {
           logGroupName: "/aws/vendedlogs/states/TestEventsStateMachine",
+          removalPolicy: cdk.RemovalPolicy.DESTROY,
         }),
         includeExecutionData: true,
         level: sfn.LogLevel.ALL,
