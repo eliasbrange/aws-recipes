@@ -31,7 +31,7 @@ export const subscribe = async (namespace: string, channelName: string) => {
   });
 
   // Give the subscription some time to establish
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await new Promise((resolve) => setTimeout(resolve, 250));
 
   const unsubscribe = async () => {
     channel.close();
