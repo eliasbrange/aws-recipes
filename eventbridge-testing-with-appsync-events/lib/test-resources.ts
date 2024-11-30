@@ -2,9 +2,9 @@ import * as cdk from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as eventbridge from "aws-cdk-lib/aws-events";
 import * as eventbridgeTargets from "aws-cdk-lib/aws-events-targets";
-import * as lambda from "aws-cdk-lib/aws-lambda";
-import { NodejsFunction } from "aws-cdk-lib/aws-lambda-nodejs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import { Construct } from "constructs";
+import * as iam from "aws-cdk-lib/aws-iam";
 
 interface ConstructProps {
   eventBus: eventbridge.IEventBus;
@@ -51,19 +51,75 @@ export class TestResources extends Construct {
       name: "default",
     });
 
-    const publishToAppSyncFn = new NodejsFunction(
+    const connection = new eventbridge.Connection(
       this,
-      "PublishToAppSyncFunction",
+      "TestEventsConnection",
       {
-        entry: "src/publishToAppSync.ts",
-        handler: "handler",
-        runtime: lambda.Runtime.NODEJS_20_X,
-        memorySize: 1769,
-        environment: {
-          EVENTS_API_URL: `https://${this.eventsApi.attrDnsHttp}`,
-          EVENTS_API_KEY: eventsApiKey.attrApiKey,
-        },
+        authorization: eventbridge.Authorization.apiKey(
+          "x-api-key",
+          cdk.SecretValue.resourceAttribute(eventsApiKey.attrApiKey),
+        ),
       },
+    );
+
+    const stateMachine = new sfn.StateMachine(this, "TestEventsStateMachine", {
+      stateMachineType: sfn.StateMachineType.EXPRESS,
+      definitionBody: sfn.DefinitionBody.fromString(
+        JSON.stringify({
+          QueryLanguage: "JSONata",
+          StartAt: "PublishTestEvent",
+          States: {
+            PublishTestEvent: {
+              Type: "Task",
+              Resource: "arn:aws:states:::http:invoke",
+              Arguments: {
+                Method: "POST",
+                Authentication: {
+                  ConnectionArn: "${ConnectionArn}",
+                },
+                ApiEndpoint: "${ApiEndpoint}",
+                RequestBody: {
+                  channel: "/default/debug",
+                  events: ["{% $string($states.input) %}"],
+                },
+              },
+              End: true,
+            },
+          },
+        }),
+      ),
+      definitionSubstitutions: {
+        ConnectionArn: connection.connectionArn,
+        ApiEndpoint: `https://${this.eventsApi.attrDnsHttp}/event`,
+      },
+    });
+
+    stateMachine.role.attachInlinePolicy(
+      new iam.Policy(this, "StateMachinePolicy", {
+        statements: [
+          new iam.PolicyStatement({
+            sid: "AllowUseConnection",
+            effect: iam.Effect.ALLOW,
+            actions: ["events:RetrieveConnectionCredentials"],
+            resources: [connection.connectionArn],
+          }),
+          new iam.PolicyStatement({
+            sid: "AllowGetConnectionSecret",
+            effect: iam.Effect.ALLOW,
+            actions: [
+              "secretsmanager:GetSecretValue",
+              "secretsmanager:DescribeSecret",
+            ],
+            resources: [connection.connectionSecretArn],
+          }),
+          new iam.PolicyStatement({
+            sid: "AllowInvokeHTTPEndpoint",
+            effect: iam.Effect.ALLOW,
+            actions: ["states:InvokeHTTPEndpoint"],
+            resources: ["*"],
+          }),
+        ],
+      }),
     );
 
     new eventbridge.Rule(this, "TestEventsRule", {
@@ -71,7 +127,7 @@ export class TestResources extends Construct {
       eventPattern: {
         source: eventbridge.Match.prefix(""),
       },
-      targets: [new eventbridgeTargets.LambdaFunction(publishToAppSyncFn)],
+      targets: [new eventbridgeTargets.SfnStateMachine(stateMachine)],
     });
   }
 }
