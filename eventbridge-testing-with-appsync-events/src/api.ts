@@ -1,19 +1,11 @@
-import {
-  EventBridgeClient,
-  PutEventsCommand,
-} from "@aws-sdk/client-eventbridge";
-import type {
-  APIGatewayProxyEventV2,
-  APIGatewayProxyResultV2,
-} from "aws-lambda";
+import { EventBridgeClient, PutEventsCommand } from "@aws-sdk/client-eventbridge";
+import type { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from "aws-lambda";
 import { ulid } from "ulid";
 
 const ebClient = new EventBridgeClient();
 const EVENT_BUS_NAME = process.env.EVENT_BUS_NAME || "default";
 
-export const handler = async (
-  _event: APIGatewayProxyEventV2,
-): Promise<APIGatewayProxyResultV2> => {
+export const handler = async (_event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
   const order = {
     id: ulid(),
     name: "test order",

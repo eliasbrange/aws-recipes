@@ -2,10 +2,10 @@ import * as cdk from "aws-cdk-lib";
 import * as appsync from "aws-cdk-lib/aws-appsync";
 import * as eventbridge from "aws-cdk-lib/aws-events";
 import * as eventbridgeTargets from "aws-cdk-lib/aws-events-targets";
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import { Construct } from "constructs";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { Construct } from "constructs";
 
 interface ConstructProps {
   eventBus: eventbridge.IEventBus;
@@ -52,16 +52,12 @@ export class TestResources extends Construct {
       name: "default",
     });
 
-    const connection = new eventbridge.Connection(
-      this,
-      "TestEventsConnection",
-      {
-        authorization: eventbridge.Authorization.apiKey(
-          "x-api-key",
-          cdk.SecretValue.resourceAttribute(eventsApiKey.attrApiKey),
-        ),
-      },
-    );
+    const connection = new eventbridge.Connection(this, "TestEventsConnection", {
+      authorization: eventbridge.Authorization.apiKey(
+        "x-api-key",
+        cdk.SecretValue.resourceAttribute(eventsApiKey.attrApiKey),
+      ),
+    });
 
     const stateMachine = new sfn.StateMachine(this, "TestEventsStateMachine", {
       stateMachineType: sfn.StateMachineType.EXPRESS,
@@ -115,10 +111,7 @@ export class TestResources extends Construct {
           new iam.PolicyStatement({
             sid: "AllowGetConnectionSecret",
             effect: iam.Effect.ALLOW,
-            actions: [
-              "secretsmanager:GetSecretValue",
-              "secretsmanager:DescribeSecret",
-            ],
+            actions: ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"],
             resources: [connection.connectionSecretArn],
           }),
           new iam.PolicyStatement({
