@@ -45,6 +45,7 @@ export class TestResources extends Construct {
 
     const eventsApiKey = new appsync.CfnApiKey(this, "TestEventsApiKey", {
       apiId: this.eventsApi.attrApiId,
+      expires: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365, // 1 year from now
     });
 
     new appsync.CfnChannelNamespace(this, "TestEventsNamespace", {
