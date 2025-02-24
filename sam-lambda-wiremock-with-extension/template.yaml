@@ -2,28 +2,46 @@ AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: Example app showcasing how to mock HTTP APIs with WireMock
 
+Parameters:
+  AnotherServiceUrl:
+    Type: String
+  WiremockExtensionArn:
+    Type: String
+    Default: ""
+    Description: "ARN of the Wiremock Lambda Extension layer. If not provided, the extension will not be used."
+
+Conditions:
+  HasWiremockExtension:
+    Fn::Not:
+      - Fn::Equals:
+        - !Ref WiremockExtensionArn
+        - ""
+
 Resources:
   StubsLayer:
+    Condition: HasWiremockExtension
     Type: AWS::Serverless::LayerVersion
     Properties:
       ContentUri: wiremock
       CompatibleRuntimes:
-        - nodejs20.x
+        - nodejs22.x
 
   ApiFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/functions/api.handler
-      Runtime: nodejs20.x
+      Runtime: nodejs22.x
       Architectures:
         - arm64
       Timeout: 30
-      Layers:
-        - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:lambda-wiremock:1
-        - !Ref StubsLayer
+      Layers: !If
+        - HasWiremockExtension
+        - - !Ref WiremockExtensionArn
+          - !Ref StubsLayer
+        - !Ref AWS::NoValue
       Environment:
         Variables:
-          ANOTHER_SERVICE_URL: http://127.0.0.1:1234/another-service
+          ANOTHER_SERVICE_URL: !Ref AnotherServiceUrl
       Events:
         HelloApi:
           Type: HttpApi

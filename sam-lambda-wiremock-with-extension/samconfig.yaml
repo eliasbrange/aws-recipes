@@ -1,0 +1,14 @@
+version: 0.1
+dev:
+  global:
+    parameters:
+      stack_name: example-app-dev
+  deploy:
+    parameters:
+      capabilities: CAPABILITY_IAM
+      confirm_changeset: false
+      resolve_s3: true
+      parameter_overrides: [
+        "WiremockExtensionArn=arn:aws:lambda:eu-west-1:107780277141:layer:lambda-wiremock:2",
+        "AnotherServiceUrl=http://127.0.0.1:1234/another-service"
+      ]

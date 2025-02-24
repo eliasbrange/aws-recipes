@@ -11,19 +11,29 @@ This example shows how to run `stubr`/ `wiremock-rs` in a Lambda Extension. This
 
 ## Deploy extension
 
-In the `lambda-wiremock` directory, run the following commands to build and deploy the extension:
+In the `extension` directory, run the following commands to build and deploy the extension:
 
 ```bash
 $ cargo lambda build --release --extension --arm64
-$ cargo lambda deploy --extension --compatible-runtimes nodejs20.x
+$ cargo lambda deploy --extension --compatible-runtimes nodejs22.x
+
+...
+
+🔍 extension arn: arn:aws:lambda:eu-west-1:123456789012:layer:lambda-wiremock:1
 ```
 
 ## Deploy example application
 
-In the `example-app` directory, deploy the SAM application and take not of the API Gateway URL:
+The repository contains a simple SAM application that uses the extension.
+
+Update the `WiremockExtensionArn` in `samconfig.yaml` with the ARN of the extension you just deployed.
+
+Deploy the application with the following commands.
 
 ```bash
-$ sam build && sam deploy
+$ npm install
+$ sam build
+$ sam deploy --config-env dev
 ```
 
 ## Try it out
